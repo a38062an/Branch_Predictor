@@ -8,7 +8,7 @@ struct Instruction {
     char type; // 'B' for branch, 'R' for other
     int sourceAddr;
     int targetAddr;
-    bool direction; // 'F' for forward 'B' for backward
+    char direction; // 'F' for forward 'B' for backward
     bool taken; // True if taken, false if not taken, irrelevant for 'R'
 };
 

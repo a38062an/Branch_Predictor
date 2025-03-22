@@ -19,8 +19,15 @@ BranchPredictor::~BranchPredictor() {
     delete btb;
 }
 
+/*
 bool BranchPredictor::predictTaken(char type, char direction) {
     return (direction == 'B' and type == 'B');
+}
+*/
+
+bool BranchPredictor::predictTaken(char type, char direction) {
+    return (type == 'B' and direction == 'B');
+
 }
 
 int BranchPredictor::predictTargetAddress(int sourceAddr){
@@ -38,6 +45,20 @@ void BranchPredictor::simulateTrace(const std::string &traceFilename) {
 
     std::cout << "Simluating: " << instructions.size() << " instructions..." << std::endl;
 
+    std::cout << "what the hell" << std::endl;
+
+
+    /*
+    for (int i = 0; i < 10; i++) {
+        Instruction instr = instructions[i];
+        std::cout << "Debug line " << i << ": Type=" << instr.type
+                  << ", Direction=" << instr.direction
+                  << ", Addr=" << std::hex << instr.sourceAddr
+                  << " to " << instr.targetAddr << std::dec
+                  << ", Taken=" << instr.taken
+                  << std::endl;
+    }
+    */
     for (const auto& instr : instructions) {
 
         int predictedTarget = predictTargetAddress(instr.sourceAddr);
@@ -49,6 +70,14 @@ void BranchPredictor::simulateTrace(const std::string &traceFilename) {
         }
 
         bool taken = predictTaken(instr.type, instr.direction);
+
+        // Debugging
+        std::cout << "Debug line "  << ": Type=" << instr.type
+                 << ", Direction=" << instr.direction
+                 << ", Addr=" << std::hex << instr.sourceAddr
+                 << " to " << instr.targetAddr << std::dec
+                 << ", Taken=" << instr.taken
+                 << std::endl;
 
         if (taken == instr.taken){
             predictionHits++;
