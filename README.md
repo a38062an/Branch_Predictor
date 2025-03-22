@@ -22,7 +22,12 @@
 
 # How to run the program
 
-```c++
+- To run the branch prediction for a given size this is how you do it: (where 10 is the size)
+```bash
 g++ -o branch_sim main.cpp BranchPredictor.cpp BranchTargetBuffer.cpp TraceReader.cpp                                                                      ‹git:main ✘› 11:41.48 Sat Mar 22 2025 >>>
 ./branch_sim ../block_profile 10
+```
+- To run and plot the results of the branch prediction for varying sizes this is how you do it:
+```bash
+./plot_btb_overhead.py
 ```

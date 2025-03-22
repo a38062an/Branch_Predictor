@@ -16,7 +16,7 @@ BranchPredictor::BranchPredictor(int btbSize)
 
 
 BranchPredictor::~BranchPredictor() {
-  delete btb;
+    delete btb;
 }
 
 bool BranchPredictor::predictTaken(char type, char direction) {
@@ -38,7 +38,7 @@ void BranchPredictor::simulateTrace(const std::string &traceFilename) {
 
     std::cout << "Simluating: " << instructions.size() << " instructions..." << std::endl;
 
-     for (const auto& instr : instructions) {
+    for (const auto& instr : instructions) {
 
         int predictedTarget = predictTargetAddress(instr.sourceAddr);
 
