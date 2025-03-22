@@ -14,4 +14,6 @@ add_executable(Branch_Predictor
         src/BranchTargetBuffer.cpp
         src/main.cpp
         src/TraceReader.cpp
+        src/TwoBitBranchPredictor.cpp
+        src/TwoBitPredictorMain.cpp
 )

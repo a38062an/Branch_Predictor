@@ -33,7 +33,6 @@ Instruction TraceReader::parseLine(const std::string &line) {
         // Get direction (B or F)
         size_t dirPos = toPos + 12; // Position after the target address
         if (dirPos < line.length()) {
-            std::cout <<  line[dirPos];
             instr.direction = line[dirPos];
         }
     } else {
