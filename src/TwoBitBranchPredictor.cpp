@@ -8,7 +8,7 @@ TwoBitBranchPredictor::TwoBitBranchPredictor(int btbSize)
       stateTableSize(btbSize),
       btbHits(0), btbMisses(0),
       staticPredictionHits(0), staticPredictionMisses(0),
-      dynamicPredictionHits(0), dynamicPredictionMisses(0) {
+      dynamicPredictionHits(0), dynamicPredictionMisses(0), btbHitButMispredicted(0) {
 
     // Initialize state table with default WEAKLY_TAKEN state
     stateTable = new PredictionState[stateTableSize];
@@ -77,15 +77,18 @@ void TwoBitBranchPredictor::simulateTrace(const std::string& traceFilename) {
     TraceReader reader(traceFilename);
     std::vector<Instruction> instructions = reader.readTrace();
 
-    std::cout << "Simulating: " << instructions.size() << " instructions..." << std::endl;
+   /* std::cout << "Simulating: " << instructions.size() << " instructions..." << std::endl;*/
 
     for (const auto& instr : instructions) {
         // BTB prediction
         int predictedTarget = predictTargetAddress(instr.sourceAddr);
-        if (predictedTarget == -1) {
-            btbMisses++;
-        } else {
+
+        bool inBTB = (predictedTarget != -1);
+
+        if (inBTB) {
             btbHits++;
+        } else {
+            btbMisses++;
         }
 
         // Static prediction
@@ -102,6 +105,9 @@ void TwoBitBranchPredictor::simulateTrace(const std::string& traceFilename) {
             dynamicPredictionHits++;
         } else {
             dynamicPredictionMisses++;
+            if (inBTB){
+                btbHitButMispredicted++;
+            }
         }
 
         // Update state and BTB
@@ -152,6 +158,7 @@ void TwoBitBranchPredictor::printStats() const {
     std::cout << "--------------" << std::endl;
     std::cout << "BTB hits: " << btbHits << std::endl;
     std::cout << "BTB misses: " << btbMisses << std::endl;
+    std::cout << "BTB hits but direction mispredicted: " << btbHitButMispredicted << std::endl;
     std::cout << "BTB hit rate: " << std::fixed << std::setprecision(2)
               << btbAccuracy << "%" << std::endl;
 }

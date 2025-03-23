@@ -5,16 +5,17 @@ import matplotlib.pyplot as plt
 import re
 import os
 
-# Some variables to be used
-SIMULATOR_PATH = "./branch_sim"
-TRACE_FILE_PATH = "../misc/block_profile"
-# Range of BTB sizes to test
-BTB_SIZES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+# Path to your compiled C++ binary and the trace file
+SIMULATOR_PATH = "./branch_sim_TwoBit"  # Change this to your binary
+TRACE_FILE_PATH = "../misc/block_profile"  # Adjust if needed
 
+# Range of BTB sizes to test (same as before)
+BTB_SIZES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
 
 def run_simulation(btb_size):
     """Run the branch predictor with a specific BTB size and return the results."""
     try:
+        # Run the simulation with the given BTB size and trace file
         result = subprocess.run(
             [SIMULATOR_PATH, TRACE_FILE_PATH, str(btb_size)],
             capture_output=True,
@@ -40,9 +41,10 @@ def parse_results(output):
         mispredicted_btb_hits = int(re.search(r"BTB hits but direction mispredicted: (\d+)", output).group(1))
 
         # Assuming in this case that each btb miss will cause an additional miss
-        instructions_executed = total_instructions;
-        instructions_fetched = total_instructions + btb_misses + mispredicted_btb_hits;
+        instructions_executed = total_instructions
+        instructions_fetched = total_instructions + btb_misses + mispredicted_btb_hits
 
+        # Calculate overhead (instructions fetched / instructions executed)
         overhead = instructions_fetched / instructions_executed if instructions_executed > 0 else 0
 
         return {
@@ -76,7 +78,7 @@ def main():
 
     # Extract data for plotting
     btb_sizes = [r["btb_size"] for r in results]
-    overheads = [r["overhead"] * 100 for r in results] # convert to percentage
+    overheads = [r["overhead"] * 100 for r in results]  # Convert to percentage
     hit_rates = [r["btb_hit_rate"] for r in results]
 
     # Create the plot
@@ -85,16 +87,14 @@ def main():
     # Plot overhead vs BTB size
     plt.subplot(1, 2, 1)
     plt.plot(btb_sizes, overheads, 'o-', color='orange', label='Overhead')
-    plt.axhline(y=100, color='gray', linestyle='--', alpha=0.7) # 100% line
+    plt.axhline(y=100, color='gray', linestyle='--', alpha=0.7)  # 100% line
     plt.xlabel('BTB Size')
-    plt.ylabel('Overhead (%)') # Updated label
+    plt.ylabel('Overhead (%)')
     plt.title('BTB Size vs. Overhead')
     plt.grid(True, alpha=0.3)
     plt.xscale('log', base=2)  # Log scale makes it easier to see the pattern
     plt.xticks(btb_sizes, [str(s) for s in btb_sizes])
     plt.legend()
-
-    # For curiousity also plotting the relationship between hit rate and btb size
 
     # Plot hit rate vs BTB size
     plt.subplot(1, 2, 2)
@@ -108,8 +108,9 @@ def main():
     plt.ylim(0, 1.05)
     plt.legend()
 
+    # Layout and saving the plot
     plt.tight_layout()
-    plt.savefig('../misc/btb_size_vs_overhead.png', dpi=300)
+    plt.savefig('../misc/btb_size_vs_overheadTwoBit.png', dpi=300)
     print(f"Plot saved as 'btb_size_vs_overhead.png'")
     plt.show()
 

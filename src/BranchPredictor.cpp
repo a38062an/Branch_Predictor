@@ -12,7 +12,8 @@
 
 
 BranchPredictor::BranchPredictor(int btbSize)
-  : btb(new BranchTargetBuffer(btbSize)), btbHits(0), btbMisses(0), predictionHits(0), predictionMisses(0) {}
+  : btb(new BranchTargetBuffer(btbSize)), btbHits(0), btbMisses(0),
+  predictionHits(0), predictionMisses(0), btbHitButMispredicted(0){}
 
 
 BranchPredictor::~BranchPredictor() {
@@ -63,26 +64,36 @@ void BranchPredictor::simulateTrace(const std::string &traceFilename) {
 
         int predictedTarget = predictTargetAddress(instr.sourceAddr);
 
-        if (predictedTarget == -1){
-            btbMisses++;
-        } else {
+        bool inBTB = (predictedTarget != -1);
+
+        if (inBTB){
             btbHits++;
+        } else {
+            btbMisses++;
         }
 
         bool taken = predictTaken(instr.type, instr.direction);
 
         // Debugging
+        /*
         std::cout << "Debug line "  << ": Type=" << instr.type
                  << ", Direction=" << instr.direction
                  << ", Addr=" << std::hex << instr.sourceAddr
                  << " to " << instr.targetAddr << std::dec
                  << ", Taken=" << instr.taken
                  << std::endl;
+        */
 
         if (taken == instr.taken){
             predictionHits++;
         } else {
             predictionMisses++;
+
+            // If we mispredict and our value that is additional overhead
+            if (inBTB){
+                btbHitButMispredicted++;
+            }
+
         }
 
         update(instr.sourceAddr, instr.targetAddr);
@@ -104,6 +115,7 @@ void BranchPredictor::printStats() const {
     std::cout << "Direction prediction hits: " << predictionHits << std::endl;
     std::cout << "Direction prediction misses: " << predictionMisses << std::endl;
     std::cout << "Direction prediction accuracy: " << predictionAccuracy << "%" << std::endl;
+    std::cout << "BTB hits but direction mispredicted: " << btbHitButMispredicted << std::endl;
     std::cout << std::endl;
     std::cout << "BTB hits: " << btbHits << std::endl;
     std::cout << "BTB misses: " << btbMisses << std::endl;

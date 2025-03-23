@@ -25,6 +25,7 @@ private:
     // Statistics
     int btbHits;
     int btbMisses;
+    int btbHitButMispredicted;
     int staticPredictionHits;
     int staticPredictionMisses;
     int dynamicPredictionHits;

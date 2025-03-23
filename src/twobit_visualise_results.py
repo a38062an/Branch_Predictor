@@ -122,7 +122,7 @@ def main():
     plt.tight_layout()
 
     # Save figure
-    plt.savefig('../misc/branch_prediction_comparison.png', dpi=300)
+    plt.savefig('../misc/branch_predictionTwoBit_comparison.png', dpi=300)
     print("Plot saved as 'branch_prediction_comparison.png'")
 
     plt.show()

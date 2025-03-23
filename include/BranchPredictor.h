@@ -13,6 +13,8 @@ private:
     int btbMisses;
     int predictionHits;
     int predictionMisses;
+    int btbHitButMispredicted;
+
 
 public:
     BranchPredictor(int btbSize);
