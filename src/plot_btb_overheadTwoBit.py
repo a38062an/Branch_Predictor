@@ -10,7 +10,7 @@ SIMULATOR_PATH = "./branch_sim_TwoBit"  # Change this to your binary
 TRACE_FILE_PATH = "../misc/block_profile"  # Adjust if needed
 
 # Range of BTB sizes to test (same as before)
-BTB_SIZES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+BTB_SIZES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 5000]
 
 def run_simulation(btb_size):
     """Run the branch predictor with a specific BTB size and return the results."""

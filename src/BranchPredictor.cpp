@@ -26,9 +26,8 @@ bool BranchPredictor::predictTaken(char type, char direction) {
 }
 */
 
-bool BranchPredictor::predictTaken(char type, char direction) {
-    return (type == 'B' and direction == 'B');
-
+bool BranchPredictor::predictTaken(int sourceAddr) {
+    return (btb->getTargetAddress(sourceAddr) != -1);
 }
 
 int BranchPredictor::predictTargetAddress(int sourceAddr){
@@ -36,8 +35,10 @@ int BranchPredictor::predictTargetAddress(int sourceAddr){
     return target;
 }
 
-void BranchPredictor::update(int sourceAddr, int targetAddr) {
-    btb -> insert(sourceAddr, targetAddr);
+void BranchPredictor::update(Instruction instr) {
+    if (instr.taken){ // If its taken add it to the cache
+        btb -> insert(instr.sourceAddr, instr.targetAddr);
+    }
 }
 
 void BranchPredictor::simulateTrace(const std::string &traceFilename) {
@@ -72,7 +73,7 @@ void BranchPredictor::simulateTrace(const std::string &traceFilename) {
             btbMisses++;
         }
 
-        bool taken = predictTaken(instr.type, instr.direction);
+        bool taken = predictTaken(instr.sourceAddr);
 
         // Debugging
         /*
@@ -96,7 +97,7 @@ void BranchPredictor::simulateTrace(const std::string &traceFilename) {
 
         }
 
-        update(instr.sourceAddr, instr.targetAddr);
+        update(instr);
 
      }
 }

@@ -23,13 +23,13 @@ public:
     // Predict if a branch will be taken using static prediction:
     // - Backward branches (target < source) are predicted taken
     // - Forward branches (target > source) are predicted not taken
-    bool predictTaken(char type, char direction);
+    bool predictTaken(int sourceAddr);
 
     // Get predicted target address from BTB
     int predictTargetAddress(int sourceAddr);
 
     // Update BTB based on actual outcome
-    void update(int sourceAddr, int targetAddr);
+    void update(Instruction instr);
 
     // Run simulation on a trace file
     void simulateTrace(const std::string& traceFilename);

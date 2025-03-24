@@ -11,9 +11,8 @@
 
 ## Decisions to make
 
-- Because we have to take cache branches lets only cache backward branches
-- The branch is cached if it is a backward branch (and invariant)
-- We will cache both conditional and unconditional because both are safe choices as unconditional is always take
+- The branch is cached if its taken.
+- The branch will be predicted taken if its in the cache.
 - We will use a Least recently used policy for our cache replacement algorithm
 - We will program the branch predictor in C++. 
 
@@ -24,7 +23,7 @@
 
 - To run the branch prediction for a given size this is how you do it: (where 10 is the size)
 ```bash
-g++ -o branch_sim main.cpp BranchPredictor.cpp BranchTargetBuffer.cpp TraceReader.cpp                                                                      ‹git:main ✘› 11:41.48 Sat Mar 22 2025 >>>
+g++ -o branch_sim main.cpp BranchPredictor.cpp BranchTargetBuffer.cpp TraceReader.cpp
 ./branch_sim ../misc/block_profile 10
 ```
 - To run and plot the results of the branch prediction for varying sizes this is how you do it:

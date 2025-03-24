@@ -13,7 +13,6 @@ STRONGLY_TAKEN = 3
 };
 
 
-
 class TwoBitBranchPredictor {
 private:
     BranchTargetBuffer* btb;
@@ -31,22 +30,21 @@ private:
     int dynamicPredictionHits;
     int dynamicPredictionMisses;
 
-    bool staticPredict(char type, char direction);
-    bool dynamicPredict(int sourceAddr);
+    // Helper methods
     int getStateIndex(int sourceAddr);
-
+    bool staticPredict(int sourceAddr);
+    bool dynamicPredict(int sourceAddr);
+    int predictTargetAddress(int sourceAddr);
+    void update(Instruction instr);
 public:
+
     TwoBitBranchPredictor(int btbSize);
     ~TwoBitBranchPredictor();
 
-    // Main functionality
-    int predictTargetAddress(int sourceAddr);
-    void update(int sourceAddr, int targetAddr, bool taken);
     void simulateTrace(const std::string& traceFilename);
     void printStats() const;
+
+
 };
 
-#endif // TWO_LEVEL_BRANCH_PREDICTOR_H
-
-
-
+#endif

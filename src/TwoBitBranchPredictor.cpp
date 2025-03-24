@@ -1,5 +1,4 @@
 #include "../include/TwoBitBranchPredictor.h"
-
 #include <iomanip>
 #include <iostream>
 
@@ -15,21 +14,22 @@ TwoBitBranchPredictor::TwoBitBranchPredictor(int btbSize)
     for (int i = 0; i < stateTableSize; i++) {
         stateTable[i] = WEAKLY_TAKEN;
     }
-
 }
 
 TwoBitBranchPredictor::~TwoBitBranchPredictor() {
-
+    delete[] stateTable;
+    delete btb;
 }
 
 int TwoBitBranchPredictor::getStateIndex(int sourceAddr) {
-   return (sourceAddr % stateTableSize);
+    return (sourceAddr % stateTableSize);
 }
 
-bool TwoBitBranchPredictor::staticPredict(char type, char direction) {
-   return(direction == 'B' && type == 'B');
+// Static prediction now matches your updated model
+bool TwoBitBranchPredictor::staticPredict(int sourceAddr) {
+    // Match your updated static model - predict taken if in BTB
+    return (btb->getTargetAddress(sourceAddr) != -1);
 }
-
 
 bool TwoBitBranchPredictor::dynamicPredict(int sourceAddr) {
     int index = getStateIndex(sourceAddr);
@@ -39,29 +39,16 @@ bool TwoBitBranchPredictor::dynamicPredict(int sourceAddr) {
 int TwoBitBranchPredictor::predictTargetAddress(int sourceAddr) {
     return btb->getTargetAddress(sourceAddr);
 }
-/*
-void TwoBitBranchPredictor::update(int sourceAddr, int targetAddr, bool taken) {
-    btb -> insert(sourceAddr, targetAddr);
 
-    int index = getStateIndex(sourceAddr);
-    if (stateTable[index] < STRONGLY_TAKEN) {
-        stateTable[index] = static_cast<PredictionState>(stateTable[index] + 1);
-    } else {
-    // Move toward STRONGLY_NOT_TAKEN
-    if (stateTable[index] > STRONGLY_NOT_TAKEN) {
-        stateTable[index] = static_cast<PredictionState>(stateTable[index] - 1);
-        }
+void TwoBitBranchPredictor::update(Instruction instr) {
+    // Always update BTB for taken branches (matches your static model)
+    if (instr.taken) {
+        btb->insert(instr.sourceAddr, instr.targetAddr);
     }
-}
-*/
-void TwoBitBranchPredictor::update(int sourceAddr, int targetAddr, bool taken) {
-    // Update BTB
-    btb->insert(sourceAddr, targetAddr);
 
-    // Update prediction state based on actual outcome
-    int index = getStateIndex(sourceAddr);
-
-    if (taken) {
+    // Update the 2-bit counter based on whether the branch was taken
+    int index = getStateIndex(instr.sourceAddr);
+    if (instr.taken) {
         // Branch was taken, move toward STRONGLY_TAKEN
         if (stateTable[index] < STRONGLY_TAKEN) {
             stateTable[index] = static_cast<PredictionState>(stateTable[index] + 1);
@@ -73,16 +60,16 @@ void TwoBitBranchPredictor::update(int sourceAddr, int targetAddr, bool taken) {
         }
     }
 }
+
 void TwoBitBranchPredictor::simulateTrace(const std::string& traceFilename) {
     TraceReader reader(traceFilename);
     std::vector<Instruction> instructions = reader.readTrace();
 
-   /* std::cout << "Simulating: " << instructions.size() << " instructions..." << std::endl;*/
+    std::cout << "Simulating: " << instructions.size() << " instructions..." << std::endl;
 
     for (const auto& instr : instructions) {
         // BTB prediction
         int predictedTarget = predictTargetAddress(instr.sourceAddr);
-
         bool inBTB = (predictedTarget != -1);
 
         if (inBTB) {
@@ -91,8 +78,8 @@ void TwoBitBranchPredictor::simulateTrace(const std::string& traceFilename) {
             btbMisses++;
         }
 
-        // Static prediction
-        bool staticTaken = staticPredict(instr.type, instr.direction);
+        // Static prediction (using your updated model)
+        bool staticTaken = staticPredict(instr.sourceAddr);
         if (staticTaken == instr.taken) {
             staticPredictionHits++;
         } else {
@@ -105,17 +92,15 @@ void TwoBitBranchPredictor::simulateTrace(const std::string& traceFilename) {
             dynamicPredictionHits++;
         } else {
             dynamicPredictionMisses++;
-            if (inBTB){
+            if (inBTB) {
                 btbHitButMispredicted++;
             }
         }
 
         // Update state and BTB
-        update(instr.sourceAddr, instr.targetAddr, instr.taken);
+        update(instr);
     }
 }
-
-
 
 void TwoBitBranchPredictor::printStats() const {
     int totalInstructions = staticPredictionHits + staticPredictionMisses;
@@ -136,31 +121,17 @@ void TwoBitBranchPredictor::printStats() const {
     std::cout << "Total instructions processed: " << totalInstructions << std::endl;
     std::cout << std::endl;
 
-    std::cout << "Static Branch Prediction Statistics:" << std::endl;
-    std::cout << "-----------------------------------" << std::endl;
-    std::cout << "Direction prediction hits: " << staticPredictionHits << std::endl;
-    std::cout << "Direction prediction misses: " << staticPredictionMisses << std::endl;
-    std::cout << "Direction prediction accuracy: " << std::fixed << std::setprecision(2)
-              << staticAccuracy << "%" << std::endl;
-    std::cout << std::endl;
+    // Modified output format for Python parsing
+    std::cout << "Static Accuracy: " << std::fixed << std::setprecision(2) << staticAccuracy << "%" << std::endl;
+    std::cout << "Dynamic Accuracy: " << std::fixed << std::setprecision(2) << dynamicAccuracy << "%" << std::endl;
+    std::cout << "Improvement: " << std::fixed << std::setprecision(2) << improvement << "%" << std::endl;
+    std::cout << "BTB Hit Rate: " << std::fixed << std::setprecision(2) << btbAccuracy << "%" << std::endl;
 
-    std::cout << "Two-Level Branch Prediction Statistics:" << std::endl;
-    std::cout << "--------------------------------------" << std::endl;
-    std::cout << "Direction prediction hits: " << dynamicPredictionHits << std::endl;
-    std::cout << "Direction prediction misses: " << dynamicPredictionMisses << std::endl;
-    std::cout << "Direction prediction accuracy: " << std::fixed
-              << dynamicAccuracy << "%" << std::endl;
-    std::cout << "Improvement over static prediction: " << std::fixed
-              << improvement << "%" << std::endl;
     std::cout << std::endl;
-
-    std::cout << "BTB Statistics:" << std::endl;
-    std::cout << "--------------" << std::endl;
     std::cout << "BTB hits: " << btbHits << std::endl;
     std::cout << "BTB misses: " << btbMisses << std::endl;
     std::cout << "BTB hits but direction mispredicted: " << btbHitButMispredicted << std::endl;
-    std::cout << "BTB hit rate: " << std::fixed << std::setprecision(2)
-              << btbAccuracy << "%" << std::endl;
+
 }
 
 
